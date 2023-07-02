@@ -512,8 +512,7 @@ export default (
 				)
 			}
 		},
-		// @ts-ignore
-		writeToMultiFiles: (folder: string) => {
+		readFromMultiFiles: (folder: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
 			const { readFileSync, existsSync } = require('fs')
 			if(folder.includes('.json')) {
