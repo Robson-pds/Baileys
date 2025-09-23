@@ -367,6 +367,7 @@ export const generateWAMessageContent = async (
 	options: MessageContentGenerationOptions
 ) => {
 	let m: WAMessageContent = {}
+	const ButtonType = proto.Message.ButtonsMessage.HeaderType
 	if ('text' in message) {
 		const extContent = { text: message.text } as WATextMessage
 
@@ -563,6 +564,76 @@ export const generateWAMessageContent = async (
 		m.requestPhoneNumberMessage = {}
 	} else {
 		m = await prepareWAMessageMedia(message, options)
+	}
+
+	if ('buttons' in message && !!message.buttons) {
+		const buttonsMessage: proto.Message.IButtonsMessage = {
+			buttons: message.buttons!.map(b => ({ ...b, type: proto.Message.ButtonsMessage.Button.Type.RESPONSE }))
+		}
+		if ('text' in message) {
+			buttonsMessage.contentText = message.text
+			buttonsMessage.headerType = ButtonType.EMPTY
+		} else {
+			if ('caption' in message) {
+				buttonsMessage.contentText = message.caption
+			}
+
+			// @ts-ignore
+			const type = Object.keys(m)[0].replace('Message', '').toUpperCase()
+			// @ts-ignore
+			buttonsMessage.headerType = ButtonType[type]
+
+			Object.assign(buttonsMessage, m)
+		}
+
+		if ('footer' in message && !!message.footer) {
+			buttonsMessage.footerText = message.footer
+		}
+
+		m = { buttonsMessage }
+	} else if ('templateButtons' in message && !!message.templateButtons) {
+		const msg: proto.Message.TemplateMessage.IHydratedFourRowTemplate = {
+			hydratedButtons: message.templateButtons
+		}
+
+		if ('text' in message) {
+			msg.hydratedContentText = message.text
+		} else {
+			if ('caption' in message) {
+				msg.hydratedContentText = message.caption
+			}
+
+			Object.assign(msg, m)
+		}
+
+		if ('footer' in message && !!message.footer) {
+			msg.hydratedFooterText = message.footer
+		}
+
+		m = {
+			templateMessage: {
+				fourRowTemplate: msg,
+				hydratedTemplate: msg
+			}
+		}
+	}
+
+	if ('sections' in message && !!message.sections) {
+		const listMessage: proto.Message.IListMessage = {
+			// @ts-ignore
+			sections: message.sections,
+			// @ts-ignore
+			buttonText: message.buttonText,
+			// @ts-ignore
+			title: message.title,
+			// @ts-ignore
+			footerText: message.footer,
+			// @ts-ignore
+			description: message.text,
+			listType: proto.Message.ListMessage.ListType.SINGLE_SELECT
+		}
+
+		m = { listMessage }
 	}
 
 	if ('viewOnce' in message && !!message.viewOnce) {
