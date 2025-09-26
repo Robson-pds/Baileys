@@ -43,7 +43,7 @@
     "@hapi/boom": "^9.1.3",
     "async-mutex": "^0.5.0",
     "axios": "^1.6.0",
-    "libsignal": "git+https://github.com/robson-pds/libsignal-node#4d08331",
+    "libsignal": "github:robson-pds/libsignal-node#4d08331a833727c338c1a90041d17b870210dfae",
     "music-metadata": "^11.7.0",
     "pino": "^9.6",
     "protobufjs": "^7.2.4",
